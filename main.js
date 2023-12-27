@@ -17,7 +17,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'MyVMS API',
+      title: 'Museum Visitor Managment System',
       version: '1.0.0',
     },
   },
