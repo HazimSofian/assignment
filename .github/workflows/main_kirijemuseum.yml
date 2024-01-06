@@ -59,4 +59,4 @@ jobs:
           app-name: 'kirijeMuseum'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A2301083514844149E339C30A1475ED7 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_29124BCCB2914032A5C53681A2A4C620 }}
