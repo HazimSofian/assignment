@@ -1,484 +1,450 @@
-
+const { error } = require('console');
 const express = require('express');
-const app = express();
-const port = process.env.PORT || 4000;
+const app = express()
+//const port = process.env.PORT || 4000;
+const port = 4000
+
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const { ObjectId } = require('mongodb');
+const moment = require('moment-timezone');
 const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://Azraii_12:Kiri-12@cluster27.pgoifwj.mongodb.net/MuseumVisitorSystem";
 const dbName = "MuseumVisitorSystem";
-const usersCollectionDB = "users";
-const visitorsCollectionDB = "visitors";
-const { ObjectId } = require('mongodb');
-const moment = require('moment-timezone');
-const swaggerJsdoc = require('swagger-jsdoc');
+
 const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Museum Visitor Managment System',
-      version: '1.0.0',
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Museum Visitor Managment System',
+        version: '1.0.0',
+      },
     },
-  },
-  apis: ['./swagger.js'],
-};
-
-const swaggerSpec = swaggerJsdoc(options);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use(cors());
-
+    apis: ['./swagger.js'],
+  };
+  
+  const swaggerSpec = swaggerJsdoc(options);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use(cors());
 
 const client = new MongoClient(uri,{
-  serverApi:{
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors:true,
-  }
-});
-
-app.use(express.json());
-let dbUsers = [
-  {
-    username: "hazeem08",
-    password: "0987654321",
-    name: "hazimfahmi",
-    email: "hazimjr763@gmail.com",
-    role  : "user"
-  },
-  {
-    username: "security",
-    password: "123456789",
-    name: "Pak Guard",
-    email: "Pak guard.com",
-    role  : "security"
-  },
-  {
-    username: "admin",
-    password: "password",
-    email : "admin@example.com",
-    role: "admin"
-  }
-]
-let dbVisitors = [
-  {
-    visitorname: "John Placebo",
-    visitorpass: "john123",
-    id: "871212053345",
-    phoneNumber: "010202067543",
-    email: "johnplacebo@example.com",
-    appointmentDate: "2023-06-21",
-    carPlate: "JLB4102",
-    purpose: "Majlis Convo",
-    destination:"Dewan Seminar",
-    registeredBy: "hazeemfahmii"
-  },
-  {
-    visitorname: "Jenny Kim",
-    visitorpass: "Jenny123",
-    id: "090909048454",
-    phoneNumber: "0987654321",
-    email: "jenniebp@example.com",
-    appointmentDate: "2023-06-22",
-    carPlate: "XYZ2987",
-    purpose: "Mesyuarat PIBG",
-    destination:"Fakulti Mekanikal",
-    registeredBy: "Albino Rafael"
-  },
-  // Add more visitors as needed
-];
-
-client.connect().then(() => {
-  console.log('Connected to MongoDB');
-
-app.post('/login', (req, res) => {
-  let data = req.body;
-  let user = login(data.username, data.password);
-
-  if (user.role === 'admin') {
-    res.send(generateToken(user, 'admin'));
-  } else if (user.role === 'user') {
-    res.send(generateToken(user, 'user'));
-  } else if (user.role === 'security') {
-    res.send(generateToken(user, 'security'));
-  } else {
-    res.send({ error: "User not found" });
-  }
-});
-
-app.post('/register', verifyToken, async (req, res) => {
-  if (req.user.role === 'admin') {
-    let data = req.body;
-    let username = data.username;
-    let match = dbUsers.find(element => element.username === username);
-    if (match) {
-      res.send("Error! User already registered.");
-    } else {
-      let result = await register(
-        data.username,
-        data.password,
-        data.name,
-        data.email,
-        data.role
-      );
-      if (result.status === 'Registration successful!') {
-        await updateUsersCollection(); // Update the users collection in MongoDB
-      }
-      res.send(result);
-    }
-  } else {
-    res.send("Unauthorized");
-  }
-});
-
-
-app.post('/addvisitors', verifyToken, async (req, res) => {
-  if (req.user.role === 'user') {
-    let data = req.body;
-    let id = data.id;
-    let match = dbVisitors.find(element => element.idnumber === id);
-    if (match) {
-    res.send("Error! Visitor data already in the system.");
-    } else 
-    {
-      let result = await addvisitor(
-        data.visitorname,
-        data.id, 
-        data.visitorpass,
-        data.phoneNumber,
-        data.email,
-        data.appointmentDate,
-        data.carPlate,
-        data.purpose,
-        data.destination,
-        data.registeredBy
-      );
-      if (result === 'Visitor registration successful!') {
-        await updateVisitorsCollection(); // Update the visitors collection in MongoDB
-      }
-      res.send(result);
-    }
-  } else {
-    res.send("Unauthorized");
-  }
-});
-
-app.get('/visitorinfo', verifyToken, async (req, res) => {
-  try {
-    // Connect to the MongoDB server
-    await client.connect();
-
-    if (req.user.role === 'admin' || req.user.role === 'security') {
-      const visitorsCursor = client
-        .db("MuseumVisitorSystem")
-        .collection("visitors")
-        .find();
-      const visitors = await visitorsCursor.toArray();
-      res.send(visitors);
-    } else if (req.user.role === 'user') {
-      const visitorsCursor = client
-        .db("MuseumVisitorSystem")
-        .collection("visitors")
-        .find({ registeredBy: req.user.userProfile.name });
-      const visitors = await visitorsCursor.toArray();
-      res.send(visitors);
-    } else {
-      res.status(401).send('Unauthorized');
-    }
-  } catch (error) {
-    console.error('Error retrieving visitor information:', error);
-    res.status(500).send('Internal Server Error');
-  } finally {
-    // Close the MongoDB connection
-    await client.close();
-  }
-});
-
-
-app.patch('/editvisitor/:id', verifyToken, async (req, res) => {
-  const visitorId = req.params.id;
-  const updateData = req.body;
-
-  try {
-    const visitorsCollection = client.db(dbName).collection(visitorsCollectionDB);
-
-    if (!visitorId) {
-      res.status(400).send('Invalid visitor ID');
-      return;
-    }
-
-    const result = await visitorsCollection.findOneAndUpdate(
-      { _id: new ObjectId(visitorId) },
-      { $set: updateData },
-      { returnOriginal: false }
-    );
-
-    if (!result.value) {
-      res.status(404).send('Visitor not found');
-    } else {
-      await updateVisitorsCollection(); // Update the visitors collection in MongoDB
-      res.send('Visitor info updated successfully');
-    }
-  } catch (error) {
-    console.error('Error updating visitor info:', error);
-    res.status(500).send('An error occurred while updating the visitor info');
-  }
-});
-
-app.delete('/deletevisitor/:id', verifyToken, async (req, res) => {
-  if (req.user.role === 'user') {
-    const visitorId = req.params.id;
-
-    try {
-      const visitorsCollection = client.db(dbName).collection(visitorsCollectionDB);
-      const result = await visitorsCollection.deleteOne({ _id: new ObjectId(visitorId) });
-
-      if (result.deletedCount === 0) {
-        res.status(404).send('Visitor not found');
-      } else {
-        await updateVisitorsCollection(); // Update the visitors collection in MongoDB
-        res.send('Visitor deleted successfully');
-      }
-    } catch (error) {
-      console.error('Error deleting visitor:', error);
-      res.status(500).send('An error occurred while deleting the visitor');
-    }
-  } else {
-    res.status(403).send('Unauthorized');
-  }
-});
-
-
-app.post('/checkin', verifyToken, async (req, res) => {
-  if (req.user.role !== 'security') {
-    return res.status(401).send('Unauthorized');
-  }
-
-  const { visitorpass, carplate } = req.body;
-  const visitor = dbVisitors.find(visitor => visitor.visitorpass === visitorpass);
-
-  if (!visitor) {
-    return res.status(404).send('Visitor not found');
-  }
-
-  const gmt8Time = moment().tz('GMT+8').format('YYYY-MM-DD HH:mm:ss');
-  visitor.checkinTime = gmt8Time;
-  visitor.carPlate = carplate;
-
-  // Insert or update the check-in data in the RecordTime collection
-  try {
-    await visitingtime(visitorpass, visitor.visitorname, visitor.checkinTime);
-    res.send(`Check-in recorded for visitor: ${visitor.visitorname}
-      Check-in time: ${visitor.checkinTime}
-      Car plate number: ${carplate}`);
-  } catch (error) {
-    console.error('Error inserting/updating RecordTime:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.post('/checkout', verifyToken, async (req, res) => {
-  if (req.user.role !== 'security') {
-    return res.status(401).send('Unauthorized');
-  }
-
-  const { visitorpass } = req.body;
-  const visitor = dbVisitors.find(visitor => visitor.visitorpass === visitorpass);
-
-  if (!visitor) {
-    return res.status(404).send('Visitor not found');
-  }
-
-  if (!visitor.checkinTime) {
-    return res.send('Visitor has not checked in');
-  }
-
-  const gmt8Time = moment().tz('GMT+8').format('YYYY-MM-DD HH:mm:ss');
-  const checkinTime = moment(visitor.checkinTime, 'YYYY-MM-DD HH:mm:ss');
-  const checkoutTime = moment(gmt8Time, 'YYYY-MM-DD HH:mm:ss');
-  visitor.checkoutTime = gmt8Time;
-
-  // Update the check-out time in the RecordTime collection
-  try {
-    await visitingtime(visitorpass, visitor.visitorname, visitor.checkinTime, visitor.checkoutTime);
-    res.send(`Checkout recorded for visitor: ${visitor.visitorname}
-      Checkout time: ${visitor.checkoutTime}`);
-  } catch (error) {
-    console.error('Error inserting/updating RecordTime:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-function login(loginuser, loginpassword) {
-  console.log("Someone is logging in!", loginuser, loginpassword); // Display mesage
-  const user = dbUsers.find(user => user.username === loginuser && user.password === loginpassword);
-  if (user) {
-    return user;
-  } else {
-    return { error: "User not found" };
-  }
-}
-
-
-function register(newusername, newpassword, newname, newemail,newrole) {
-  let match = dbUsers.find(element => element.username === newusername);
-  if (match) {
-    return "Error! Username is already taken.";
-  } else  {
-    const newUser = {
-      username: newusername,
-      password: newpassword,
-      name: newname,
-      email: newemail,
-      role: newrole
-    };
-    dbUsers.push(newUser);
-    return {
-      status: "Registration successful!",
-      user: newUser
-    };
-  }
-}
-
-function addvisitor(name, id, visitorpass, phoneNumber, email, appointmentDate, carPlate, purpose, destination
-  , registeredBy) {
-  // Check if the visitor with the same ID already exists
-  let match = dbVisitors.find(element => element.idnumber === id);
-  if (match) {
-    return "Error! Visitor data already in the system.";
-  } else {
-    // Check if the visitorpass meets the required format
-    const passRegex = new RegExp(`^${name}\\d{4}$`);
-    if (!passRegex.test(visitorpass)) {
-      return "Error! Invalid visitorpass. It should be a combination of 'visitorname' and 4 numbers.";
-    }
-
-    dbVisitors.push({
-      visitorname: name,
-      visitorpass: visitorpass,
-      idnumber: id,
-      phoneNumber: phoneNumber,
-      email: email,
-      date: appointmentDate,
-      carPlate: carPlate,
-      purpose: purpose,
-      destination: destination,
-      registerBy: registeredBy
-    });
-    return "Visitor registration successful!";
-  }
-}
-
-async function updateUsersCollection() {
-  try {
-    const usersCollection = client.db(dbName).collection(usersCollectionDB);
-
-    for (const user of dbUsers) {
-      const existingUser = await usersCollection.findOne({ _id: user._id });
-
-      if (existingUser) {
-        await usersCollection.updateOne(
-          { _id: user._id },
-          { $set: user },
-          { upsert: true }
-        );
-      } else {
-        user._id = new ObjectId(); // Generate a new ObjectId
-        await usersCollection.insertOne(user);
-      }
-    }
-
-    console.log('Users collection updated successfully');
-  } catch (error) {
-    console.error('Error updating users collection:', error);
-  }
-}
-async function updateVisitorsCollection() {
-  try {
-    const visitorsCollection = client.db(dbName).collection(visitorsCollectionDB);
-
-    for (const visitor of dbVisitors) {
-      const existingVisitor = await visitorsCollection.findOne({ _id: visitor._id });
-
-      if (existingVisitor) {
-        await visitorsCollection.updateOne(
-          { _id: visitor._id },
-          { $set: visitor },
-          { upsert: true }
-        );
-      } else {
-        visitor._id = new ObjectId(); // Generate a new ObjectId
-        await visitorsCollection.insertOne(visitor);
-      }
-    }
-
-    console.log('Visitors collection updated successfully');
-  } catch (error) {
-    console.error('Error updating visitors collection:', error);
-  }
-}
-
-async function visitingtime(visitorPass, visitorName, checkinTime, checkoutTime) {
-  try {
-    await client.connect();
-    const db = client.db(dbName);
-    const RecordCollectionDB = db.collection('RecordTime');
-    // Check if the visitor record already exists
-    const existingRecord = await RecordCollectionDB.findOne({ visitorpass: visitorPass });
-
-    if (existingRecord) {
-      // Update the existing record with the visitor name and checkout time
-      await RecordCollectionDB.updateOne(
-        { visitorpass: visitorPass },
-        { $set: { visitorName: visitorName, checkoutTime: checkoutTime } }
-      );
-      console.log('RecordTime updated successfully');
-    } else {
-      // Create a new document for the visitor
-      const document = {
-        visitorpass: visitorPass,
-        visitorName: visitorName,
-        checkinTime: checkinTime,
-        checkoutTime: checkoutTime
-      };
-      // Insert the document
-      await RecordCollectionDB.insertOne(document);
-      console.log('RecordTime inserted successfully');
-    }
-    // Close the connection
-    client.close();
-  } catch (error) {
-    console.error('Error inserting/updating RecordTime:', error);
-  }
-}
-
-function generateToken(userProfile, role) {
-  const payload = {
-    userProfile,
-    role
-  };
-  return jwt.sign(payload, 'access_token', 
-  { expiresIn: 30 * 60 });
-}
-
-function verifyToken(req, res, next) {
-  let header = req.headers.authorization;
-  let token = header.split(' ')[1];
-
-  jwt.verify(token, 'access_token', function (err, decoded) {
-    if (err) {
-      res.send("Invalid Token");
-    } else {
-      req.user = decoded;
-      next();
+    serverApi:{
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors:true,
     }
   });
+  
+  client.connect().then(() => {
+    console.log('Connected to MongoDB');
+    const db = client.db('MuseumVisitorSystem');
+    adminCollection = db.collection('admin');
+    visitDetailCollection = db.collection('visitorinfo');
+    securityCollection = db.collection('security');
+    usersCollection = db.collection('users');
+  
+
+    ////Function User Login
+  async function Userlogin(reqUsername, reqPassword) {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+  
+      // Validate the request payload
+      if (!reqUsername || !reqPassword) {
+        throw new Error('Missing required fields');
+      }
+  
+      let matchuser = await usersCollection.findOne({ Username: reqUsername });
+  
+      if (!matchuser) {
+        throw new Error('User not found!');
+      }
+      if (matchuser.Password === reqPassword) {
+        return {
+          user: matchuser,
+        };
+      } else {
+        throw new Error('Invalid password');
+      }
+    } catch (error) {
+      console.error('Login Error:', error);
+      throw new Error('An error occurred during login.');
+    } finally {
+      await client.close();
+    }
+  }
+
+//Function Admin Register
+async function registerAdmin(reqAdminUsername, reqAdminPassword, reqAdminName, reqAdminEmail) {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+
+
+    // Validate the request payload
+    if (!reqAdminUsername || !reqAdminPassword || !reqAdminName || !reqAdminEmail) {
+      throw new Error('Missing required fields');
+    }
+
+    await adminCollection.insertOne({
+      Username: reqAdminUsername,
+      Password: reqAdminPassword,
+      name: reqAdminName,
+      email: reqAdminEmail,
+    });
+
+    return 'Registration Complete!!';
+    } catch (error) {
+    console.error('Registration Error:', error);
+    throw new Error('An error occurred during registration.');
+   } finally {
+    await client.close();
+  }
 }
+  //Function Admin Login
+  async function Adminlogin(reqAdminUsername, reqAdminPassword) {
+   const client = new MongoClient(uri);
+   try {
+     await client.connect();
+
+     // Validate the request payload
+     if (!reqAdminUsername || !reqAdminPassword) {
+       throw new Error('Missing required fields');
+     }
+     let matchuser = await adminCollection.findOne({ Username: reqAdminUsername });
+
+     if (!matchuser) {
+       throw new Error('User not found!');
+     }
+     if (matchuser.Password === reqAdminPassword) {
+       const token = generateToken(matchuser);
+       return {
+        user: matchuser,
+        token: token,
+       };
+     } else {
+       throw new Error('Invalid password');
+     }
+   } catch (error) {
+     console.error('Login Error:', error);
+     throw new Error('An error occurred during login.');
+   } finally {
+     await client.close();
+   }
+  }
+
+   //Function Security Login
+   async function Securitylogin(reqSecurityUsername, reqSecurityPassword) {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+ 
+      // Validate the request payload
+      if (!reqSecurityUsername || !reqSecurityPassword) {
+        throw new Error('Missing required fields');
+      }
+      let matchuser = await securityCollection.findOne({ Username: reqSecurityUsername });
+ 
+      if (!matchuser) {
+        throw new Error('User not found!');
+      }
+      if (matchuser.Password === reqSecurityPassword) {
+        const token = generateToken(matchuser);
+        return {
+         user: matchuser,
+         token: token,
+        };
+      } else {
+        throw new Error('Invalid password');
+      }
+    } catch (error) {
+      console.error('Login Error:', error);
+      throw new Error('An error occurred during login.');
+    } finally {
+      await client.close();
+    }
+   }
+ 
+  //Function User Register
+  async function Usersregister(reqUsername, reqPassword, reqName, reqEmail) {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+ 
+ 
+      // Validate the request payload
+      if (!reqUsername || !reqPassword || !reqName || !reqEmail ) {
+        throw new Error('Missing required fields');
+      }
+ 
+      await usersCollection.insertOne({
+        Username: reqUsername,
+        Password: reqPassword,
+        name: reqName,
+        email: reqEmail,
+      });
+ 
+      return 'Registration Complete!!';
+      } catch (error) {
+      console.error('Registration Error:', error);
+      throw new Error('An error occurred during registration.');
+     } finally {
+      await client.close();
+    }
+   }
+
+     //Function Security Register
+  async function registerSecurity(reqUsername, reqPassword, reqName, reqEmail) {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+ 
+ 
+      // Validate the request payload
+      if (!reqUsername || !reqPassword || !reqName || !reqEmail ) {
+        throw new Error('Missing required fields');
+      }
+ 
+      await securityCollection.insertOne({
+        Username: reqUsername,
+        Password: reqPassword,
+        name: reqName,
+        email: reqEmail,
+      });
+ 
+      return 'Registration Complete!!';
+      } catch (error) {
+      console.error('Registration Error:', error);
+      throw new Error('An error occurred during registration.');
+     } finally {
+      await client.close();
+    }
+   }
+
+  //Function Generate Token
+  function generateToken(user) {
+    const payload = 
+    {
+      username: user.AdminUsername,
+    };
+    const token = jwt.sign
+    (
+      payload, 'password', 
+      { expiresIn: '1h' }
+    );
+    return token;
+  }
+  
+  //Function Verify
+  function verifyToken(req, res, next) {
+    let header = req.headers.authorization;
+    console.log(header);
+  
+    let token = header.split(' ')[1];
+  
+    jwt.verify(token, 'password', function (err, decoded) {
+      if (err) {
+        return res.status(401).send('Invalid Token');
+      }
+  
+      req.user = decoded;
+      next();
+    });
+  }
+  
+  // Express setup
+  app.use(express.json());
+
+  //Login User
+  app.post('/Userlogin', (req, res) => {
+    console.log(req.body);
+  
+    Userlogin(req.body.Username, req.body.Password)
+      .then((result) => {
+        res.json(result.user); // Return user information without generating a token
+      })
+      .catch((error) => {
+        res.status(400).send(error.message);
+      });
+  });
+  
+  //Register User
+  app.post('/Usersregister', (req, res) => {
+    console.log(req.body);
+
+    Usersregister(req.body.Username, req.body.Password, req.body.name, req.body.email)
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((error) => {
+      res.status(400).send(error.message);
+      });
+  });
+
+  app.post('/Addvisitor', async (req, res) => {
+    try {
+      const {visitorName, gender, citizenship, visitorAddress, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
+
+      // Ensure all required fields are present
+      if (!visitorName || !gender || !UserId || !visitDate || !purpose || !citizenship || !visitorAddress || !phoneNo || !vehicleNo) {
+        throw new Error('Missing required fields');
+      }
+
+      const db = client.db('MuseumVisitorSystem');
+      const visitDetailCollection = db.collection('visitorinfo');
+
+      // Insert the visit data into the visitDetailCollection
+      const visitData = {
+        visitorName,
+        gender,
+        citizenship,
+        visitorAddress,
+        phoneNo,
+        vehicleNo,
+        UserId,
+        visitDate,
+        purpose
+      };
+      await visitDetailCollection.insertOne(visitData);
+
+      res.send('Visit created successfully');
+    } catch (error) {
+      console.error('Error creating visit:', error);
+      res.status(500).send('An error occurred while creating the visit');
+    }
+  });
+
+// Update visitor (only admin)
+app.patch('/EditVisitor/:visitDetailId', verifyToken, (req, res) => {
+  const visitDetailId = req.params.visitDetailId;
+  const { visitorName, gender, citizenship, visitorAddress, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
+
+  if (!visitorName && !gender && !citizenship && !visitorAddress && !phoneNo && !vehicleNo && !UserId && !visitDate && !purpose) {
+    res.status(400).send('No fields provided for update');
+    return;
+  }
+
+  const updateData = {};
+
+  if (visitorName) updateData.visitorName = visitorName;
+  if (gender) updateData.gender = gender;
+  if (citizenship) updateData.citizenship = citizenship;
+  if (visitorAddress) updateData.visitorAddress = visitorAddress;
+  if (phoneNo) updateData.phoneNo = phoneNo;  // Fix the typo in property name
+  if (vehicleNo) updateData.vehicleNo = vehicleNo;  // Fix the typo in property name
+  if (UserId) updateData.UserId = UserId;
+  if (visitDate) updateData.visitDate = visitDate;
+  if (purpose) updateData.purpose = purpose;
+
+  visitDetailCollection
+    .findOneAndUpdate({ _id: new ObjectId(visitDetailId) }, { $set: updateData })
+    .then((result) => {
+      if (!result.value) {
+        // No matching document found
+        throw new Error('Visit not found');
+      }
+      res.send('Visit updated successfully');
+    })
+    .catch((error) => {
+      console.error('Error updating visit:', error);
+      if (error.message === 'Visit not found') {
+        res.status(404).send('Visit not found');
+      } else {
+        res.status(500).send('An error occurred while updating the visit');
+      }
+    });
+});
+
+  // Delete visit (only admin)
+  app.delete('/deletevisitor/:visitDetailId',verifyToken, (req, res) => {
+    const visitDetailId = req.params.visitDetailId;
+  
+    visitDetailCollection
+      .deleteOne({ _id: new ObjectId(visitDetailId) })
+      .then(() => {
+        res.send('Visit detail deleted successfully');
+      })
+      .catch((error) => {
+        console.error('Error deleting visit detail:', error);
+        res.status(500).send('An error occurred while deleting the visit detail');
+      });
+  });
+  
+  // Read visit details (only Security)  
+  app.get('/visitorinfo',verifyToken, (req, res) => {
+    visitDetailCollection
+      .find({})
+      .toArray()
+      .then((visitDetails) => {
+        res.json(visitDetails);
+      })
+      .catch((error) => {
+        console.error('Error retrieving visit details:', error);
+        res.status(500).send('An error occurred while retrieving visit details');
+      });
+  });
+
+  //Register Security
+  app.post('/register-security', (req, res) => {
+    console.log(req.body);
+      
+      registerSecurity(req.body.Username, req.body.Password, req.body.name, req.body.email)
+          .then((result) => {
+            res.send(result);
+        })
+        .catch((error) => {
+          res.status(400).send(error.message);
+        });
+  });
+    
+      //Login Security
+      app.post('/login-Security', (req, res) => {
+        console.log(req.body);
+      
+        Securitylogin(req.body.Username, req.body.Password)
+          .then((result) => {
+            let token = generateToken(result);
+            res.send(token);
+          })
+          .catch((error) => {
+            res.status(400).send(error.message);
+          });
+      });
+
+//Register Admin
+app.post('/register-admin', (req, res) => {
+  console.log(req.body);
+
+  registerAdmin(req.body.Username, req.body.Password, req.body.name, req.body.email)
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((error) => {
+      res.status(400).send(error.message);
+    });
+});
+
+      //Login Admin
+       app.post('/login-Admin', (req, res) => {
+          console.log(req.body);
+  
+         Adminlogin(req.body.Username, req.body.Password)
+         .then((result) => {
+           let token = generateToken(result);
+           res.send(token);
+         })
+         .catch((error) => {
+           res.status(400).send(error.message);
+         });
+      });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
+      
 }).catch((error) => {
   console.error('Error connecting to MongoDB:', error);
 });

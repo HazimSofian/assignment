@@ -1,114 +1,102 @@
-POST http://localhost:4000/login
+####### User Login
+POST http://localhost:4000/Userlogin
 Content-Type: application/json
 
 {
-  "username": "hazeem08",
-  "password": "0987654321"
+  "Username": "Wan",
+  "Password": "1234"
 }
 
-############################ NEW USER LOGIN
-POST http://localhost:4000/login
+####### User Registration
+POST http://localhost:4000/Usersregister
 Content-Type: application/json
 
 {
-  "username": "Azz",
-  "password": "zaaa"
+  "Username": "Wan",
+  "Password": "1234",
+  "name": "Ridhwan",
+  "email": "wan@example.com"
 }
-################################ ADMIN LOGIN
 
-POST http://localhost:4000/login
+####### Create Visit
+POST http://localhost:4000/Addvisitor
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "password"
+  "visitorName": "Ridhwan",
+  "gender": "Male",
+  "citizenship": "Malaysia",
+  "visitorAddress": "no 31 jalan puaka, selangor",
+  "phoneNo": "012454647",
+  "vehicleNo": "ABC123",
+  "UserId": "kuroo1234",
+  "visitDate": "2024-01-06",
+  "purpose": "Sightseeing"
 }
 
-######################### SECURITY
-POST http://localhost:4000/login
+######## Edit Visitor (Update)
+PATCH http://localhost:4000/EditVisitor/65993e55518930bd92adc9e1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDcxNDAsImV4cCI6MTcwNDU1MDc0MH0.RKNs6Nrev_iPSYVQ4o97wPtWwERjPvbR6NN-crQAmrk
 
 {
-  "username": "security",
-  "password": "123456789"
-}
-############################### REGISTER USER BY ADMIN
-POST http://localhost:4000/register
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6IkF6eiIsInBhc3N3b3JkIjoiemFhYSIsIm5hbWUiOiJBbG1pbmEgZ2F6aSIsImVtYWlsIjoibmV3dXNlcjJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJfaWQiOiI2NTg5OTQzMWZiYTI2ZTE4MTkxNjU0YjUifSwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDM1MTUyNzAsImV4cCI6MTcwMzUxNzA3MH0.E5Osu-EK0fc5wBYOKPNNxfsLISBcMfMfOuGfvwqVFe8
-
-{
-  "username": "Azz",
-  "password": "zaaa",
-  "name": "Almina gazi",
-  "email": "newuser2@gmail.com",
-  "role": "user"
+  "visitorName": "Anis",
+  "gender": "Female",
+  "citizenship": "Korea",
+  "visitorAddress": "456 New St",
+  "phoneNo": "0142464274",
+  "vehicleNo": "XYZ789",
+  "UserId": "nis4567",
+  "visitDate": "2024-01-07",
+  "purpose": "Tour"
 }
 
-############################### ADD VISITOR BY USER
-POST http://localhost:4000/addvisitors
+######## Delete Visit
+DELETE http://localhost:4000/deletevisitor/6599342dac346636ffebfb50
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6IkF6eiIsInBhc3N3b3JkIjoiemFhYSIsIm5hbWUiOiJBbG1pbmEgZ2F6aSIsImVtYWlsIjoibmV3dXNlcjJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJfaWQiOiI2NTg5OTQzMWZiYTI2ZTE4MTkxNjU0YjUifSwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDM1MTUyNzAsImV4cCI6MTcwMzUxNzA3MH0.E5Osu-EK0fc5wBYOKPNNxfsLISBcMfMfOuGfvwqVFe8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDY2NzEsImV4cCI6MTcwNDU1MDI3MX0.5XuSnADqxbvDsO7IKz8JA2aI5K0OiAcdMFmw6NwLjZY
 
-{
-  "visitorname": "Ahmad Ahmad",
-  "id": "01214215212",
-  "visitorpass": "Ahmad Ahmad5678",
-  "phoneNumber": "0142464274",
-  "email": "Ahmad@gmail.com",
-  "appointmentDate": "2024-06-227",
-  "carPlate": "AMY4127",
-  "purpose": "VIP",
-  "destination": "Museum",
-  "registeredBy": "Almina gazi"
-}
-
-##################### VISITOR CHECKIN BY SECURITY
-POST http://localhost:4000/checkin  
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6InNlY3VyaXR5IiwicGFzc3dvcmQiOiIxMjM0NTY3ODkiLCJuYW1lIjoiUGFrIEd1YXJkIiwiZW1haWwiOiJQYWsgZ3VhcmQuY29tIiwicm9sZSI6InNlY3VyaXR5IiwiX2lkIjoiNjU4OTg1Njk1ZjQ3MjEzMzZmYWI3MTEzIn0sInJvbGUiOiJzZWN1cml0eSIsImlhdCI6MTcwMzUxMTk1NiwiZXhwIjoxNzAzNTEzNzU2fQ.V2jq0uQzzzHLdNAUHtyTNLsmAta4dM67zFOAaPW2RWo
-
-{
-  "visitorpass": "ayam1234",
-  "carplate": "KER8195"
-}
-
-############################# VISITOR CHECKOUT BY SECURITY
-POST http://localhost:4000/checkout 
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6InNlY3VyaXR5IiwicGFzc3dvcmQiOiIxMjM0NTY3ODkiLCJuYW1lIjoiUGFrIEd1YXJkIiwiZW1haWwiOiJQYWsgZ3VhcmQuY29tIiwicm9sZSI6InNlY3VyaXR5IiwiX2lkIjoiNjU4OTg1Njk1ZjQ3MjEzMzZmYWI3MTEzIn0sInJvbGUiOiJzZWN1cml0eSIsImlhdCI6MTcwMzUxMTk1NiwiZXhwIjoxNzAzNTEzNzU2fQ.V2jq0uQzzzHLdNAUHtyTNLsmAta4dM67zFOAaPW2RWo
-
-{
-  "visitorpass": "ayam1234",
-  "carplate":"KER8195"
-}
-
-############################# EDIT DATA BY USER
-PATCH http://localhost:4000/editvisitor/64994ee23c9d03924720c246
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6ImhhemVlbTA4IiwicGFzc3dvcmQiOiIwOTg3NjU0MzIxIiwibmFtZSI6ImhhemltZmFobWkiLCJlbWFpbCI6ImhhemltanI3NjNAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJfaWQiOiI2NTg5OTQyZmZiYTI2ZTE4MTkxNjU0YjIifSwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDM1MTUzNDcsImV4cCI6MTcwMzUxNzE0N30.3AJJRRvfjhxDWRm2i1ow8Gi5Ryex4LgTNtXsxrmjdb8
-
-{
-  "visitorname": "Ahmad Ahmad",
-  "phoneNumber": "8555555555555555555",
-  "appointmentDate": "2025-10-22"
-}
-
-###################################### DELETE DATA BY USER
-DELETE http://localhost:4000/deletevisitor/64994ee23c9d03924720c246
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6ImhhemVlbTA4IiwicGFzc3dvcmQiOiIwOTg3NjU0MzIxIiwibmFtZSI6ImhhemltZmFobWkiLCJlbWFpbCI6ImhhemltanI3NjNAZ21haWwuY29tIiwicm9sZSI6InVzZXIifSwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDM2NDAzNDksImV4cCI6MTcwMzY0MjE0OX0.HbG9RKAYZ5D80ueQsuIIKtH0MlMvL-8dozzkIysKRKM
-
-
-####################################### ALL VISITOR ADMIN SECURITY
+######## Get Visit Details
 GET http://localhost:4000/visitorinfo
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6InNlY3VyaXR5IiwicGFzc3dvcmQiOiIxMjM0NTY3ODkiLCJuYW1lIjoiUGFrIEd1YXJkIiwiZW1haWwiOiJQYWsgZ3VhcmQuY29tIiwicm9sZSI6InNlY3VyaXR5IiwiX2lkIjoiNjU4OTk0MzBmYmEyNmUxODE5MTY1NGIzIn0sInJvbGUiOiJzZWN1cml0eSIsImlhdCI6MTcwMzUxNTU2MiwiZXhwIjoxNzAzNTE3MzYyfQ.vF9xaTGnD07iSgjjQgBV5XFjcWbhhcwRSW04DUII1eA
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDM5NTcsImV4cCI6MTcwNDU0NzU1N30.xmQfCSl-YIcPH9yQ5w5pf9qn2xOeSLLwJl-Zx9YCh2s
 
-############################################ USER BY VISITOR NAME
-GET http://localhost:4000/visitorinfo
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyUHJvZmlsZSI6eyJ1c2VybmFtZSI6IkF6eiIsInBhc3N3b3JkIjoiemFhYSIsIm5hbWUiOiJBbG1pbmEgZ2F6aSIsImVtYWlsIjoibmV3dXNlcjJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJfaWQiOiI2NTg5OTQzMWZiYTI2ZTE4MTkxNjU0YjUifSwicm9sZSI6InVzZXIiLCJpYXQiOjE3MDM1MTU2NzEsImV4cCI6MTcwMzUxNzQ3MX0.13BOFZ-xbt7YPbO-YBn7zAJwfkf79q33xwwEB16rSOM
+######## Register Security
+POST http://localhost:4000/register-security
+Content-Type: application/json
 
 {
- "registeredBy": "hazeemfahmii"
+  "Username": "SecurityGuard",
+  "Password": "454746",
+  "name": "Safwan",
+  "email": "safwan@example.com"
 }
 
+######## Login Security
+POST http://localhost:4000/login-Security
+Content-Type: application/json
+
+{
+  "Username": "SecurityGuard",
+  "Password": "454746"
+}
+
+######## Register Admin
+POST http://localhost:4000/register-admin
+Content-Type: application/json
+
+{
+  "Username": "Hazeem",
+  "Password": "jimjim",
+  "name": "Fahmi",
+  "email": "Fahmi@example.com"
+}
+
+######## Login Admin
+POST http://localhost:4000/login-Admin
+Content-Type: application/json
+
+{
+  "Username": "Hazeem",
+  "Password": "jimjim"
+}

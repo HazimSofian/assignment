@@ -1,21 +1,11 @@
 /**
  * @swagger
- * components:
- *   securitySchemes:
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
  * /Userlogin:
  *   post:
  *     tags:
  *       - User
- *     summary: "User Login"
- *     description: "Authenticate a user and return user information."
+ *     summary: User Login
+ *     description: Authenticate a user and return user information.
  *     requestBody:
  *       required: true
  *       content:
@@ -25,13 +15,13 @@
  *             properties:
  *               Username:
  *                 type: string
- *                 description: "User's username"
+ *                 description: User's username
  *               Password:
  *                 type: string
- *                 description: "User's password"
+ *                 description: User's password
  *     responses:
  *       200:
- *         description: "User authenticated successfully"
+ *         description: User authenticated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -39,9 +29,9 @@
  *               properties:
  *                 user:
  *                   type: object
- *                   description: "User information"
+ *                   description: User information
  *       400:
- *         description: "Bad Request - Missing required fields"
+ *         description: Bad Request - Missing required fields
  *         content:
  *           application/json:
  *             schema:
@@ -49,9 +39,9 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   description: "Error message"
+ *                   description: Error message
  *       401:
- *         description: "Unauthorized - Invalid username or password"
+ *         description: Unauthorized - Invalid username or password
  *         content:
  *           application/json:
  *             schema:
@@ -59,9 +49,9 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   description: "Error message"
+ *                   description: Error message
  *       500:
- *         description: "Internal Server Error"
+ *         description: Internal Server Error
  *         content:
  *           application/json:
  *             schema:
@@ -69,17 +59,17 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   description: "Error message"
+ *                   description: Error message
  */
 
 /**
  * @swagger
- * /register:
+ * /Usersregister:
  *   post:
  *     tags:
  *       - User
- *     summary: "User Registration"
- *     description: "Register a new user."
+ *     summary: User Registration
+ *     description: Register a new user.
  *     requestBody:
  *       required: true
  *       content:
@@ -89,27 +79,27 @@
  *             properties:
  *               Username:
  *                 type: string
- *                 description: "User's username"
+ *                 description: User's username
  *               Password:
  *                 type: string
- *                 description: "User's password"
- *               Name:
+ *                 description: User's password
+ *               name:
  *                 type: string
- *                 description: "User's name"
- *               Email:
+ *                 description: User's name
+ *               email:
  *                 type: string
  *                 format: email
- *                 description: "User's email address"
+ *                 description: User's email address
  *     responses:
  *       200:
- *         description: "User registered successfully"
+ *         description: User registered successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: string
- *               description: "Success message"
+ *               description: Success message
  *       400:
- *         description: "Bad Request - Missing required fields"
+ *         description: Bad Request - Missing required fields
  *         content:
  *           application/json:
  *             schema:
@@ -117,9 +107,16 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   description: "Error message"
+ *                   description: Error message
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: Error message
  *       500:
- *         description: "Internal Server Error"
+ *         description: Internal Server Error
  *         content:
  *           application/json:
  *             schema:
@@ -127,12 +124,12 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   description: "Error message"
+ *                   description: Error message
  */
 
 /**
  * @swagger
- * /addvisitors:
+ * /Addvisitor:
  *   post:
  *     tags:
  *       - Visitor
@@ -149,25 +146,28 @@
  *               visitorName:
  *                 type: string
  *                 description: "Visitor's name"
- *               visitorpass:
+ *               gender:
  *                 type: string
- *                 description: "Visitor's pass"
+ *                 description: "Visitor's gender"
+ *               citizenship:
+ *                 type: string
+ *                 description: "Visitor's citizenship"
+ *               visitorAddress:
+ *                 type: string
+ *                 description: "Visitor's address"
  *               phoneNo:
  *                 type: string
  *                 description: "Visitor's phone number"
- *               carplate:
+ *               vehicleNo:
  *                 type: string
  *                 description: "Visitor's vehicle number"
- *               _Id:
+ *               UserId:
  *                 type: string
- *                 description: "ID of the host"
+ *                 description: "ID of the host user"
  *               visitDate:
  *                 type: string
  *                 format: date
  *                 description: "Date of the visit"
- *               place:
- *                 type: string
- *                 description: "Visit place"
  *               purpose:
  *                 type: string
  *                 description: "Purpose of the visit"
@@ -203,7 +203,7 @@
 
 /**
  * @swagger
- * /editvisit/{id}:
+ * /EditVisitor/{visitDetailId}:
  *   patch:
  *     tags:
  *       - Admin
@@ -212,9 +212,9 @@
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - name: id
+ *       - name: visitDetailId
  *         in: path
- *         description: "ID of the visitor to be edited"
+ *         description: "ID of the visit detail to be edited"
  *         required: true
  *         type: string
  *     requestBody:
@@ -224,31 +224,31 @@
  *           schema:
  *             type: object
  *             properties:
- *               _id:
- *                 type: string
- *                 description: "Visit detail ID"
  *               visitorName:
  *                 type: string
  *                 description: "Visitor's name"
- *               visitorpass:
+ *               gender:
  *                 type: string
- *                 description: "Visitor's pass"
+ *                 description: "Visitor's gender"
+ *               citizenship:
+ *                 type: string
+ *                 description: "Visitor's citizenship"
+ *               visitorAddress:
+ *                 type: string
+ *                 description: "Visitor's address"
  *               phoneNo:
  *                 type: string
  *                 description: "Visitor's phone number"
- *               carPlate:
+ *               vehicleNo:
  *                 type: string
  *                 description: "Visitor's vehicle number"
- *               email:
+ *               UserId:
  *                 type: string
- *                 description: "Visitor's email"
- *               appointmentDate:
+ *                 description: "ID of the host user"
+ *               visitDate:
  *                 type: string
  *                 format: date
  *                 description: "Date of the visit"
- *               place:
- *                 type: string
- *                 description: "Visit place"
  *               purpose:
  *                 type: string
  *                 description: "Purpose of the visit"
@@ -281,16 +281,16 @@
 
 /**
  * @swagger
- * /delete-visit/{Id}:
+ * /deletevisitor/{visitDetailId}:
  *   delete:
  *     tags:
  *       - Admin
  *     summary: "Delete a Visit"
- *     description: "Delete a visit detail by visit detail ID. Only accessible to admins."
+ *     description: "Delete a visit detail by visit ID. Only accessible to admins."
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - name: Id
+ *       - name: visitDetailId
  *         in: path
  *         description: "ID of the visit detail to delete"
  *         required: true
@@ -298,8 +298,6 @@
  *     responses:
  *       200:
  *         description: "Visit detail deleted successfully"
- *       404:
- *         description: "Visit detail not found"
  *       500:
  *         description: "Internal Server Error"
  *         content:
@@ -317,9 +315,9 @@
  * /visitorinfo:
  *   get:
  *     tags:
- *       - Admin
+ *       - Security
  *     summary: "Get Visitor Information"
- *     description: "Retrieve a list of visit details. Only accessible to admins."
+ *     description: "Retrieve a list of visit details. Only accessible to security personnel."
  *     security:
  *       - BearerAuth: []
  *     responses:
@@ -338,31 +336,252 @@
  *                   visitorName:
  *                     type: string
  *                     description: "Visitor's name"
- *                   visitorpass:
+ *                   gender:
  *                     type: string
- *                     description: "Visitor's pass"
+ *                     description: "Visitor's gender"
+ *                   citizenship:
+ *                     type: string
+ *                     description: "Visitor's citizenship"
+ *                   visitorAddress:
+ *                     type: string
+ *                     description: "Visitor's address"
  *                   phoneNo:
  *                     type: string
  *                     description: "Visitor's phone number"
- *                   carPlate:
+ *                   vehicleNo:
  *                     type: string
  *                     description: "Visitor's vehicle number"
- *                   email:
+ *                   UserId:
  *                     type: string
- *                     description: "Visitor's email"
- *                   appointmentDate:
+ *                     description: "ID of the host user"
+ *                   visitDate:
  *                     type: string
  *                     format: date
  *                     description: "Date of the visit"
- *                   place:
- *                     type: string
- *                     description: "Visit place"
  *                   purpose:
  *                     type: string
  *                     description: "Purpose of the visit"
  *                   registeredBy:
- *                     type: "string"
+ *                     type: string
  *                     description: "Username of the user who registered the visitor."
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ */
+
+/**
+ * @swagger
+ * /register-security:
+ *   post:
+ *     tags:
+ *       - Security
+ *     summary: "Register Security"
+ *     description: "Register a new security personnel."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Username:
+ *                 type: string
+ *                 description: "Security personnel's username"
+ *               Password:
+ *                 type: string
+ *                 description: "Security personnel's password"
+ *               name:
+ *                 type: string
+ *                 description: "Security personnel's name"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: "Security personnel's email address"
+ *     responses:
+ *       200:
+ *         description: "Security personnel registered successfully"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: "Success message"
+ *       400:
+ *         description: "Bad Request - Missing required fields"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ */
+
+/**
+ * @swagger
+ * /login-Security:
+ *   post:
+ *     tags:
+ *       - Security
+ *     summary: "Security Login"
+ *     description: "Authenticate a security personnel and return a JWT token."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Username:
+ *                 type: string
+ *                 description: "Security personnel's username"
+ *               Password:
+ *                 type: string
+ *                 description: "Security personnel's password"
+ *     responses:
+ *       200:
+ *         description: "Security personnel authenticated successfully"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: "JWT token"
+ *       400:
+ *         description: "Bad Request - Invalid username or password"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ */
+
+/**
+ * @swagger
+ * /register-admin:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: "Register Admin"
+ *     description: "Register a new admin user."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Username:
+ *                 type: string
+ *                 description: "Admin user's username"
+ *               Password:
+ *                 type: string
+ *                 description: "Admin user's password"
+ *               name:
+ *                 type: string
+ *                 description: "Admin user's name"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: "Admin user's email address"
+ *     responses:
+ *       200:
+ *         description: "Admin user registered successfully"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: "Success message"
+ *       400:
+ *         description: "Bad Request - Missing required fields"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ */
+
+/**
+ * @swagger
+ * /login-Admin:
+ *   post:
+ *     tags:
+ *       - Admin
+ *     summary: "Admin Login"
+ *     description: "Authenticate an admin user and return a JWT token."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Username:
+ *                 type: string
+ *                 description: "Admin user's username"
+ *               Password:
+ *                 type: string
+ *                 description: "Admin user's password"
+ *     responses:
+ *       200:
+ *         description: "Admin user authenticated successfully"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: "JWT token"
+ *       400:
+ *         description: "Bad Request - Invalid username or password"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
  *       500:
  *         description: "Internal Server Error"
  *         content:
