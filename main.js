@@ -224,6 +224,18 @@ async function registerAdmin(reqAdminUsername, reqAdminPassword, reqAdminName, r
     }
    }
 
+// Function to generate a random visitor pass
+function generateVisitorPass() {
+  const passLength = 8;
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+  let pass = '';
+  for (let i = 0; i < passLength; i++) {
+    pass += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return pass;
+}
+
   //Function Generate Token
   function generateToken(user) {
     const payload = 
