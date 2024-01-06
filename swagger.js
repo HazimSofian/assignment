@@ -1,5 +1,15 @@
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+/**
+ * @swagger
  * /Userlogin:
  *   post:
  *     tags:
@@ -316,6 +326,7 @@
  *   get:
  *     tags:
  *       - Security
+ *       - Admin
  *     summary: "Get Visitor Information"
  *     description: "Retrieve a list of visit details. Only accessible to security personnel."
  *     security:
