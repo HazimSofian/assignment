@@ -441,6 +441,39 @@ app.post('/register-admin', (req, res) => {
          });
       });
 
+// Visitor Get pass 
+app.route('/get-visitor-pass/:hostId')
+.post((req, res) => {
+  const hostId = req.params.hostId;
+
+  // Validate hostId
+  if (!hostId) {
+    res.status(400).send('Missing hostId');
+    return;
+  }
+
+  // Check if the hostId exists in the database
+  hostCollection.findOne({ _id: new ObjectId(hostId) })
+    .then((host) => {
+      if (!host) {
+        res.status(404).send('Host not found');
+        return;
+      }
+
+      // Generate a visitor pass
+      const visitorPass = generateVisitorPass();
+
+      // Store the visitor pass in the database if needed
+      hostCollection.updateOne({ _id: new ObjectId(hostId) }, { $set: { visitorPass: visitorPass } });
+
+      res.json({ visitorPass });
+    })
+    .catch((error) => {
+      console.error('Error getting visitor pass:', error);
+      res.status(500).send('An error occurred while getting the visitor pass');
+    });
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
