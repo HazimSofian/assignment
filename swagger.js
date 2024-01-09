@@ -607,29 +607,93 @@
 
 /**
  * @swagger
- * /get-visitor-pass/{hostId}:
- *   get:
+ * /checkin:
+ *   post:
  *     tags:
  *       - Visitor
- *     summary: Retrieve the visitor pass for a host
- *     parameters:
- *       - in: path
- *         name: hostId
- *         required: true
- *         description: The ID of the host to retrieve the visitor pass for
- *         schema:
- *           type: string
+ *       - User
+ *     summary: "Check-in Visitor"
+ *     description: "Check-in a visitor by visit ID."
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               visitDetailId:
+ *                 type: string
+ *                 description: "ID of the visit detail to check-in"
  *     responses:
  *       200:
- *         description: Successful response with the retrieved visitor pass
+ *         description: "Visitor checked-in successfully"
+ *       400:
+ *         description: "Bad Request - Invalid visit ID"
  *         content:
  *           application/json:
- *             example:
- *               visitorPass: ABC123
- *       400:
- *         description: Bad request, missing hostId
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
  *       404:
- *         description: Host not found
+ *         description: "Visit not found"
  *       500:
- *         description: Internal server error
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
  */
+
+/**
+ * @swagger
+ * /checkout/{visitDetailId}:
+ *   patch:
+ *     tags:
+ *       - Visitor
+ *       - User
+ *     summary: "Check-out Visitor"
+ *     description: "Check-out a visitor by visit ID."
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: visitDetailId
+ *         in: path
+ *         description: "ID of the visit detail to check-out"
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: "Visitor checked-out successfully"
+ *       400:
+ *         description: "Bad Request - Invalid visit ID"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ *       404:
+ *         description: "Visit not found"
+ *       500:
+ *         description: "Internal Server Error"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: "Error message"
+ */
+

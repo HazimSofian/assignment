@@ -4,6 +4,7 @@ const app = express()
 //const port = process.env.PORT || 4000;
 const port = 4000
 
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const { ObjectId } = require('mongodb');
@@ -77,33 +78,36 @@ const client = new MongoClient(uri,{
     }
   }
 
-//Function Admin Register
+// Function Admin Register
 async function registerAdmin(reqAdminUsername, reqAdminPassword, reqAdminName, reqAdminEmail) {
   const client = new MongoClient(uri);
   try {
     await client.connect();
-
 
     // Validate the request payload
     if (!reqAdminUsername || !reqAdminPassword || !reqAdminName || !reqAdminEmail) {
       throw new Error('Missing required fields');
     }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(reqAdminPassword, 10);
+
     await adminCollection.insertOne({
       Username: reqAdminUsername,
-      Password: reqAdminPassword,
+      Password: hashedPassword,
       name: reqAdminName,
       email: reqAdminEmail,
     });
 
     return 'Registration Complete!!';
-    } catch (error) {
+  } catch (error) {
     console.error('Registration Error:', error);
     throw new Error('An error occurred during registration.');
-   } finally {
+  } finally {
     await client.close();
   }
 }
+
   //Function Admin Login
   async function Adminlogin(reqAdminUsername, reqAdminPassword) {
    const client = new MongoClient(uri);
@@ -168,73 +172,100 @@ async function registerAdmin(reqAdminUsername, reqAdminPassword, reqAdminName, r
     }
    }
  
-  //Function User Register
-  async function Usersregister(reqUsername, reqPassword, reqName, reqEmail) {
-    const client = new MongoClient(uri);
-    try {
-      await client.connect();
- 
- 
-      // Validate the request payload
-      if (!reqUsername || !reqPassword || !reqName || !reqEmail ) {
-        throw new Error('Missing required fields');
-      }
- 
-      await usersCollection.insertOne({
-        Username: reqUsername,
-        Password: reqPassword,
-        name: reqName,
-        email: reqEmail,
-      });
- 
-      return 'Registration Complete!!';
-      } catch (error) {
-      console.error('Registration Error:', error);
-      throw new Error('An error occurred during registration.');
-     } finally {
-      await client.close();
-    }
-   }
+ // Function Users register
+async function Usersregister(reqUsername, reqPassword, reqName, reqEmail) {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
 
-     //Function Security Register
-  async function registerSecurity(reqUsername, reqPassword, reqName, reqEmail) {
-    const client = new MongoClient(uri);
-    try {
-      await client.connect();
- 
- 
-      // Validate the request payload
-      if (!reqUsername || !reqPassword || !reqName || !reqEmail ) {
-        throw new Error('Missing required fields');
-      }
- 
-      await securityCollection.insertOne({
-        Username: reqUsername,
-        Password: reqPassword,
-        name: reqName,
-        email: reqEmail,
-      });
- 
-      return 'Registration Complete!!';
-      } catch (error) {
-      console.error('Registration Error:', error);
-      throw new Error('An error occurred during registration.');
-     } finally {
-      await client.close();
+    // Validate the request payload
+    if (!reqUsername || !reqPassword || !reqName || !reqEmail) {
+      throw new Error('Missing required fields');
     }
-   }
 
-// Function to generate a random visitor pass
-function generateVisitorPass() {
-  const passLength = 8;
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  
-  let pass = '';
-  for (let i = 0; i < passLength; i++) {
-    pass += characters.charAt(Math.floor(Math.random() * characters.length));
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(reqPassword, 10);
+
+    await usersCollection.insertOne({
+      Username: reqUsername,
+      Password: hashedPassword,
+      name: reqName,
+      email: reqEmail,
+    });
+
+    return 'Registration Complete!!';
+  } catch (error) {
+    console.error('Registration Error:', error);
+    throw new Error('An error occurred during registration.');
+  } finally {
+    await client.close();
   }
-  return pass;
 }
+
+
+// Function Security Register
+async function registerSecurity(reqUsername, reqPassword, reqName, reqEmail) {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+
+    // Validate the request payload
+    if (!reqUsername || !reqPassword || !reqName || !reqEmail) {
+      throw new Error('Missing required fields');
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(reqPassword, 10);
+
+    await securityCollection.insertOne({
+      Username: reqUsername,
+      Password: hashedPassword,
+      name: reqName,
+      email: reqEmail,
+    });
+
+    return 'Registration Complete!!';
+  } catch (error) {
+    console.error('Registration Error:', error);
+    throw new Error('An error occurred during registration.');
+  } finally {
+    await client.close();
+  }
+}
+
+   async function visitingtime(visitorPass, visitorName, checkinTime, checkoutTime) {
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+      const RecordCollectionDB = db.collection('RecordTime');
+      // Check if the visitor record already exists
+      const existingRecord = await RecordCollectionDB.findOne({ visitorpass: visitorPass });
+  
+      if (existingRecord) {
+        // Update the existing record with the visitor name and checkout time
+        await RecordCollectionDB.updateOne(
+          { visitorpass: visitorPass },
+          { $set: { visitorName: visitorName, checkoutTime: checkoutTime } }
+        );
+        console.log('RecordTime updated successfully');
+      } else {
+        // Create a new document for the visitor
+        const document = {
+          visitorpass: visitorPass,
+          visitorName: visitorName,
+          checkinTime: checkinTime,
+          checkoutTime: checkoutTime
+        };
+        // Insert the document
+        await RecordCollectionDB.insertOne(document);
+        console.log('RecordTime inserted successfully');
+      }
+      // Close the connection
+      await client.close();
+    } catch (error) {
+      console.error('Error inserting/updating RecordTime:', error);
+    }
+  }
 
   //Function Generate Token
   function generateToken(user) {
@@ -298,10 +329,10 @@ function generateVisitorPass() {
 
   app.post('/Addvisitor', async (req, res) => {
     try {
-      const {visitorName, gender, citizenship, visitorAddress, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
+      const {visitorName, gender, citizenship, visitorpass, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
 
       // Ensure all required fields are present
-      if (!visitorName || !gender || !UserId || !visitDate || !purpose || !citizenship || !visitorAddress || !phoneNo || !vehicleNo) {
+      if (!visitorName || !gender || !UserId || !visitDate || !purpose || !citizenship || !visitorpass || !phoneNo || !vehicleNo) {
         throw new Error('Missing required fields');
       }
 
@@ -311,9 +342,9 @@ function generateVisitorPass() {
       // Insert the visit data into the visitDetailCollection
       const visitData = {
         visitorName,
+        visitorpass,
         gender,
         citizenship,
-        visitorAddress,
         phoneNo,
         vehicleNo,
         UserId,
@@ -332,9 +363,9 @@ function generateVisitorPass() {
 // Update visitor (only admin)
 app.patch('/EditVisitor/:visitDetailId', verifyToken, (req, res) => {
   const visitDetailId = req.params.visitDetailId;
-  const { visitorName, gender, citizenship, visitorAddress, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
+  const { visitorName, gender, citizenship, visitorpass, phoneNo, vehicleNo, UserId, visitDate, purpose } = req.body;
 
-  if (!visitorName && !gender && !citizenship && !visitorAddress && !phoneNo && !vehicleNo && !UserId && !visitDate && !purpose) {
+  if (!visitorName && !gender && !citizenship && !visitorpass && !phoneNo && !vehicleNo && !UserId && !visitDate && !purpose) {
     res.status(400).send('No fields provided for update');
     return;
   }
@@ -342,9 +373,9 @@ app.patch('/EditVisitor/:visitDetailId', verifyToken, (req, res) => {
   const updateData = {};
 
   if (visitorName) updateData.visitorName = visitorName;
+  if (visitorpass) updateData.visitorpass = visitorpass;
   if (gender) updateData.gender = gender;
   if (citizenship) updateData.citizenship = citizenship;
-  if (visitorAddress) updateData.visitorAddress = visitorAddress;
   if (phoneNo) updateData.phoneNo = phoneNo;  // Fix the typo in property name
   if (vehicleNo) updateData.vehicleNo = vehicleNo;  // Fix the typo in property name
   if (UserId) updateData.UserId = UserId;
@@ -453,38 +484,61 @@ app.post('/register-admin', (req, res) => {
          });
       });
 
-// Visitor Get pass 
-app.route('/get-visitor-pass/:hostId')
-.post((req, res) => {
-  const hostId = req.params.hostId;
+  // Check-In (Visitor)
+app.post('/checkin', verifyToken, async (req, res) => {
 
-  // Validate hostId
-  if (!hostId) {
-    res.status(400).send('Missing hostId');
-    return;
+  const { visitorpass, vehicleNo, visitorName } = req.body;
+  const visitor = visitDetailCollection.find(visitor => visitor.visitorpass === visitorpass);
+
+  if (!visitorpass || !vehicleNo || !visitorName) {
+    return res.status(404).send('Visitor not found');
   }
 
-  // Check if the hostId exists in the database
-  hostCollection.findOne({ _id: new ObjectId(hostId) })
-    .then((host) => {
-      if (!host) {
-        res.status(404).send('Host not found');
-        return;
-      }
+  const gmt8Time = moment().tz('GMT+8').format('YYYY-MM-DD HH:mm:ss');
+  visitor.checkinTime = gmt8Time;
+  visitor.vehicleNo= vehicleNo;
 
-      // Generate a visitor pass
-      const visitorPass = generateVisitorPass();
+  // Insert or update the check-in data in the RecordTime collection
+  try {
+    await visitingtime(visitorpass, visitorName, visitor.checkinTime);
+    res.send(`Check-in recorded for visitor: ${visitorName}
+      Check-in time: ${visitor.checkinTime}
+      Car plate number: ${vehicleNo}`);
+  } catch (error) {
+    console.error('Error inserting/updating RecordTime:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
-      // Store the visitor pass in the database if needed
-      hostCollection.updateOne({ _id: new ObjectId(hostId) }, { $set: { visitorPass: visitorPass } });
+// Check-Out (Visitor)
+app.post('/checkout', verifyToken, async (req, res) => {
+  const { visitorpass, vehicleNo, visitorName } = req.body;
 
-      res.json({ visitorPass });
-    })
-    .catch((error) => {
-      console.error('Error getting visitor pass:', error);
-      res.status(500).send('An error occurred while getting the visitor pass');
-    });
-})
+  const visitor = await visitDetailCollection.findOne({ visitorpass: visitorpass });
+
+  if (!visitor) {
+    return res.status(404).send('Visitor not found');
+  }
+
+  const gmt8Time = moment().tz('GMT+8').format('YYYY-MM-DD HH:mm:ss');
+
+  // Update the visitor's check-out details
+  await visitDetailCollection.updateOne(
+    { visitorpass: visitorpass },
+    { $set: { checkoutTime: gmt8Time } }
+  );
+
+  // Update the check-out time in the RecordTime collection
+  try {
+    await visitingtime(visitorpass, visitorName, visitor.checkinTime, gmt8Time);
+    res.send(`Checkout recorded for visitor: ${visitorName}\nCheckout time: ${gmt8Time}`);
+  } catch (error) {
+    console.error('Error recording checkout:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

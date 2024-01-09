@@ -3,8 +3,8 @@ POST http://localhost:4000/Userlogin
 Content-Type: application/json
 
 {
-  "Username": "Wan",
-  "Password": "1234"
+  "Username": "kimi",
+  "Password": "KimRin1256"
 }
 
 ####### User Registration
@@ -12,10 +12,10 @@ POST http://localhost:4000/Usersregister
 Content-Type: application/json
 
 {
-  "Username": "Wan",
-  "Password": "1234",
-  "name": "Ridhwan",
-  "email": "wan@example.com"
+  "Username": "kimi",
+  "Password": "KimRin1256",
+  "name": "Shahrin",
+  "email": "Kimi@example.com"
 }
 
 ####### Create Visit
@@ -23,27 +23,27 @@ POST http://localhost:4000/Addvisitor
 Content-Type: application/json
 
 {
-  "visitorName": "Ridhwan",
-  "gender": "Male",
+  "visitorName": "Fathia",
+  "visitorpass": "uhlsduv2387",
+  "gender": "Female",
   "citizenship": "Malaysia",
-  "visitorAddress": "no 31 jalan puaka, selangor",
-  "phoneNo": "012454647",
-  "vehicleNo": "ABC123",
-  "UserId": "kuroo1234",
-  "visitDate": "2024-01-06",
-  "purpose": "Sightseeing"
+  "phoneNo": "016323489",
+  "vehicleNo": "Amy4741",
+  "UserId": "Faty9800",
+  "visitDate": "2024-01-14",
+  "purpose": "Tour"
 }
 
 ######## Edit Visitor (Update)
-PATCH http://localhost:4000/EditVisitor/65993e55518930bd92adc9e1
+PATCH http://localhost:4000/EditVisitor/659b400af8d97e6668047787
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDcxNDAsImV4cCI6MTcwNDU1MDc0MH0.RKNs6Nrev_iPSYVQ4o97wPtWwERjPvbR6NN-crQAmrk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ2NzM3MDcsImV4cCI6MTcwNDY3NzMwN30.ZYLRQCHsnXdyHT18hvUh53WeLI-Z9HrMk99xJX-PdaQ
 
 {
   "visitorName": "Anis",
+  "visitorpass": "hvghghjrd87u",
   "gender": "Female",
-  "citizenship": "Korea",
-  "visitorAddress": "456 New St",
+  "citizenship": "Malaysia",
   "phoneNo": "0142464274",
   "vehicleNo": "XYZ789",
   "UserId": "nis4567",
@@ -52,14 +52,36 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDcxN
 }
 
 ######## Delete Visit
-DELETE http://localhost:4000/deletevisitor/6599342dac346636ffebfb50
+DELETE http://localhost:4000/deletevisitor/659b400af8d97e6668047787
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDY2NzEsImV4cCI6MTcwNDU1MDI3MX0.5XuSnADqxbvDsO7IKz8JA2aI5K0OiAcdMFmw6NwLjZY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ2NzM5MTcsImV4cCI6MTcwNDY3NzUxN30.e5FPM-Olw_z1QmS-wVJRmFwqbFt_7SlfHo7U5-h6xTk
 
 ######## Get Visit Details
 GET http://localhost:4000/visitorinfo
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ1NDM5NTcsImV4cCI6MTcwNDU0NzU1N30.xmQfCSl-YIcPH9yQ5w5pf9qn2xOeSLLwJl-Zx9YCh2s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ2NzM5MTcsImV4cCI6MTcwNDY3NzUxN30.e5FPM-Olw_z1QmS-wVJRmFwqbFt_7SlfHo7U5-h6xTk
+
+##################### VISITOR CHECKIN BY SECURITY
+POST http://localhost:4000/checkin  
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ2Nzc1MzAsImV4cCI6MTcwNDY4MTEzMH0.jnSCkoTBrQ4CRHTuTB24gfCVOHoDeiWhRqOgS6jXPcs
+
+{
+  "visitorpass": "dxnfdxd4323",
+  "visitorName": "Ridhwan",
+  "vehicleNo": "ABC123"
+}
+
+############################# VISITOR CHECKOUT BY SECURITY
+POST http://localhost:4000/checkout 
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDQ2Nzc1MzAsImV4cCI6MTcwNDY4MTEzMH0.jnSCkoTBrQ4CRHTuTB24gfCVOHoDeiWhRqOgS6jXPcs
+
+{
+  "visitorpass": "dxnfdxd4323",
+  "visitorName": "Ridhwan",
+  "vehicleNo":"ABC123"
+}
 
 ######## Register Security
 POST http://localhost:4000/register-security
